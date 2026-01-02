@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Pulumi
+.pulumi/
+Pulumi.*.json
+
+# Node (Pulumiが内部で使うことあり)
+node_modules/
+
+# OS/Editor
+.vscode/
+.DS_Store
+
