@@ -7,6 +7,7 @@ app = Flask(__name__)
 @app.get("/")
 def index():
     env_name = os.getenv("ENV_NAME", "unknown")
+    app_rev = os.getenv("APP_REV", "unknown")
     now = datetime.now(timezone.utc).isoformat()
 
     # いまはDB未接続（後続でCloud SQL + Alembicを入れる）
@@ -18,6 +19,7 @@ def index():
         <h2>simple-web</h2>
         <ul>
           <li>ENV_NAME: {env_name}</li>
+          <li>APP_REV: {app_rev}</li>
           <li>SAMPLE_VALUE: {sample_value}</li>
           <li>timestamp(UTC): {now}</li>
         </ul>
