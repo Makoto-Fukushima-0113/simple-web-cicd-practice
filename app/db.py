@@ -5,12 +5,20 @@ def build_db_url() -> str:
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")
     db = os.getenv("DB_NAME")
-    # Cloud Run + Cloud SQL Proxy(Unix socket) 前提
-    instance = os.getenv("INSTANCE_CONNECTION_NAME")
-    if not all([user, password, db, instance]):
-        raise RuntimeError(f"Missing env vars. user={bool(user)} pass={bool(password)} db={bool(db)} instance={bool(instance)}")
+    if not all([user, password, db]):
+        raise RuntimeError(
+            f"Missing env vars. user={bool(user)} pass={bool(password)} db={bool(db)}"
+        )
 
-    return f"mysql+pymysql://{user}:{password}@localhost/{db}?unix_socket=/cloudsql/{instance}"
+    # Cloud Run（Cloud SQL 連携）: /cloudsql/<INSTANCE> の Unix socket を使う
+    instance = os.getenv("INSTANCE_CONNECTION_NAME")
+    if instance:
+        return f"mysql+pymysql://{user}:{password}@localhost/{db}?unix_socket=/cloudsql/{instance}"
+
+    # Cloud Build（Proxy）やローカル: TCP でつなぐ（デフォルトは Proxy の想定）
+    host = os.getenv("DB_HOST", "127.0.0.1")
+    port = os.getenv("DB_PORT", "3306")
+    return f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}"
 
 def fetch_latest_demo_item() -> str:
     engine = create_engine(build_db_url(), pool_pre_ping=True)
