@@ -1,4 +1,23 @@
 steps:
-- name: "gcr.io/cloud-builders/gcloud"
-  entrypoint: "bash"
-  args: ["-c", "echo DEV build OK; gcloud --version"]
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build','-t','asia-northeast1-docker.pkg.dev/$PROJECT_ID/containers/simple-web:dev-$SHORT_SHA','.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push','asia-northeast1-docker.pkg.dev/$PROJECT_ID/containers/simple-web:dev-$SHORT_SHA']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - 'run'
+  - 'deploy'
+  - 'simple-web'
+  - '--image'
+  - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/containers/simple-web:dev-$SHORT_SHA'
+  - '--region'
+  - 'asia-northeast1'
+  - '--no-allow-unauthenticated'
+  - '--set-env-vars'
+  - 'ENV_NAME=dev,APP_REV=$SHORT_SHA'
+
+images:
+- 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/containers/simple-web:dev-$SHORT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
